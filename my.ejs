@@ -1,0 +1,38 @@
+<section>
+  <div class="page-heading">
+    <div><div class="eyebrow">RESERVATIONS</div><h1>My Reservations</h1><p>Track your submitted room and facility requests.</p></div>
+    <a class="primary" href="/reservations/new">Make Reservation</a>
+  </div>
+
+  <div class="card">
+    <% if (!reservations.length) { %>
+      <div class="empty"><h3>No reservations yet</h3><p>Create your first reservation to see it here.</p><a class="primary" href="/reservations/new">Make Reservation</a></div>
+    <% } else { %>
+      <div class="table-wrap">
+        <table data-table class="reservations-table">
+          <thead><tr><th>Reference</th><th>Facility</th><th>Date &amp; Time</th><th>Purpose</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <% reservations.forEach(r => { %>
+              <tr>
+                <td><a class="ref-link" href="/reservations/<%= r.id %>"><%= r.reference_no %></a></td>
+                <td><strong><%= r.room_name %></strong><small><%= r.room_type %></small></td>
+                <td><strong><%= String(r.reservation_date).slice(0,10) %></strong><small><%= r.start_time %> – <%= r.end_time %></small></td>
+                <td><%= r.purpose %><small><%= r.number_of_users %> users</small></td>
+                <td>
+                  <span class="badge <%= r.status.toLowerCase() %>"><%= r.status %></span>
+                  <% if (r.status === 'Rejected' && r.rejection_reason) { %><small class="reason"><%= r.rejection_reason %></small><% } %>
+                </td>
+                <td class="actions">
+                  <a class="row-action" href="/reservations/<%= r.id %>">View</a>
+                  <% if (r.can_cancel) { %>
+                    <form class="inline-form" action="/reservations/<%= r.id %>/cancel" method="post" onsubmit="return confirm('Cancel this reservation?');"><button class="row-action danger" type="submit">Cancel</button></form>
+                  <% } else if (r.status === 'Pending' || r.status === 'Approved') { %><span class="locked-note" title="Reservations can't be changed once their start time has passed">Past</span><% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</section>

@@ -1,0 +1,6 @@
+<section>
+  <div class="page-heading"><div><div class="eyebrow">ADMINISTRATION</div><h1>Manage Users</h1><p>View account roles and control account status.</p></div></div>
+  <div class="card"><div class="table-wrap"><table data-table><thead><tr><th>User</th><th>School ID</th><th>Role</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>
+    <% users.forEach(user => { %><tr><td><strong><%= user.full_name %></strong><br><small><%= user.email %></small></td><td><%= user.school_id %></td><td><span class="facility-type"><%= user.role %></span></td><td><span class="badge <%= user.status.toLowerCase() %>"><%= user.status %></span></td><td><%= new Date(user.created_at).toISOString().slice(0,10) %></td><td><% if (user.id === currentUser.id) { %><span class="muted">Current account</span><% } else { %><form class="inline-form" action="/admin/users/<%= user.id %>/status" method="post"><select name="status" onchange="this.form.submit()"><option value="">Change</option><option>Active</option><option>Inactive</option><option>Pending</option></select></form><% } %></td></tr><% }) %>
+  </tbody></table></div></div>
+</section>

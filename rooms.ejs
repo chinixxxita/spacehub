@@ -1,0 +1,13 @@
+<section>
+  <div class="page-heading"><div><div class="eyebrow">ADMINISTRATION</div><h1>Manage Rooms & Laboratories</h1><p>Add facilities, update details, or temporarily disable access.</p></div><div class="heading-actions"><a class="button-link-dark" href="/admin/maintenance">Maintenance Schedule</a><a class="primary" href="/admin/rooms/new">Add Facility</a></div></div>
+  <div class="card"><div class="table-wrap"><table data-table><thead><tr><th>Facility</th><th>Type</th><th>Capacity</th><th>Equipment</th><th>Status</th><th></th></tr></thead><tbody>
+    <% rooms.forEach(room => { %><tr><td><strong><%= room.name %></strong><br><small><%= room.building || '' %> <%= room.floor || '' %></small></td><td><span class="facility-type"><%= room.type %></span></td><td><%= room.capacity %></td><td><%= room.air_conditioned ? 'AC' : 'No AC' %> · <%= room.has_computers ? room.computer_count + ' PCs' : 'No PCs' %></td><td><span class="badge <%= room.status.toLowerCase() %>"><%= room.status %></span></td><td><a href="/admin/rooms/<%= room.id %>/edit">Edit</a><form class="inline-form" action="/admin/rooms/<%= room.id %>/status" method="post"><select name="status" onchange="this.form.submit()"><option value="">Change status</option><option>Available</option><option>Unavailable</option><option>Maintenance</option></select></form></td></tr><% }) %>
+  </tbody></table></div></div>
+</section>
+
+<section>
+  <div class="page-heading"><div><div class="eyebrow">FACILITY AVAILABILITY</div><h2>Upcoming Maintenance</h2><p>Scheduled maintenance automatically blocks reservation requests for those dates.</p></div></div>
+  <div class="card">
+    <% if (!maintenance.length) { %><div class="empty">No upcoming maintenance schedules.</div><% } else { %><div class="table-wrap"><table><thead><tr><th>Facility</th><th>Dates</th><th>Reason</th><th>Status</th></tr></thead><tbody><% maintenance.forEach(m => { %><tr><td><strong><%= m.room_name %></strong></td><td><%= m.start_date.toString().slice(0,10) %> → <%= m.end_date.toString().slice(0,10) %></td><td><%= m.reason %></td><td><span class="badge scheduled">Scheduled</span></td></tr><% }) %></tbody></table></div><% } %>
+  </div>
+</section>

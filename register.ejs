@@ -1,0 +1,42 @@
+<section class="auth-card register-card" data-motion="login-card">
+  <div class="auth-heading">
+    <div class="brand-mark">SH</div>
+    <div>
+      <h1>Create your account</h1>
+      <p class="muted">CSPC SpaceHub</p>
+    </div>
+  </div>
+
+  <form action="/register" method="post" class="register-form">
+    <label for="school_id">Student / Faculty / Instructor ID</label>
+    <input id="school_id" name="school_id" type="text" placeholder="Enter your official ID" autocomplete="username" value="<%= form?.school_id || '' %>" required>
+    <p class="field-hint">Use your official CSPC institutional ID.</p>
+
+    <label for="full_name">Full Name</label>
+    <input id="full_name" name="full_name" value="<%= form?.full_name || '' %>" required>
+
+    <label for="email">CSPC Email</label>
+    <input id="email" type="email" name="email" value="<%= form?.email || '' %>" required>
+
+    <label for="role">Account Type</label>
+    <select id="role" name="role">
+      <option value="student" <%= form?.role === 'student' ? 'selected' : '' %>>Student</option>
+      <option value="faculty" <%= form?.role === 'faculty' ? 'selected' : '' %>>Faculty / Instructor</option>
+    </select>
+
+    <label for="password">Password</label>
+    <input id="password" type="password" name="password" minlength="8" required autocomplete="new-password">
+
+    <label for="confirm_password">Confirm Password</label>
+    <input id="confirm_password" type="password" name="confirm_password" minlength="8" required autocomplete="new-password">
+
+    <label class="terms-check">
+      <input type="checkbox" name="terms_accepted" value="on" <%= form?.terms_accepted ? 'checked' : '' %> required>
+      <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms and Conditions</a> of CSPC SpaceHub.</span>
+    </label>
+
+    <button class="primary full" type="submit">Create Account</button>
+  </form>
+
+  <p class="muted center">Already registered? <a href="/login">Sign in</a></p>
+</section>

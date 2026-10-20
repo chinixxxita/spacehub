@@ -1,0 +1,14 @@
+<section>
+  <div class="page-heading"><div><div class="eyebrow">ADMINISTRATION</div><h1><%= room ? 'Edit Facility' : 'Add Facility' %></h1><p>Keep room and laboratory information accurate for reservation decisions.</p></div></div>
+  <form class="card form-card" action="/admin/rooms/save" method="post">
+    <% if (room) { %><input type="hidden" name="id" value="<%= room.id %>"><% } %>
+    <label>Facility Name *</label><input name="name" required value="<%= room ? room.name : '' %>" placeholder="e.g. Computer Laboratory 3">
+    <div class="two-col"><div><label>Type *</label><select name="type"><option <%= room && room.type==='Room'?'selected':'' %>>Room</option><option <%= room && room.type==='Laboratory'?'selected':'' %>>Laboratory</option></select></div><div><label>Capacity *</label><input type="number" name="capacity" min="1" required value="<%= room ? room.capacity : '' %>"></div></div>
+    <div class="two-col"><div><label>Building</label><input name="building" value="<%= room ? room.building || '' : '' %>"></div><div><label>Floor</label><input name="floor" value="<%= room ? room.floor || '' : '' %>"></div></div>
+    <div class="check-row"><label class="check"><input type="checkbox" name="air_conditioned" <%= room && room.air_conditioned ? 'checked':'' %>> Air-conditioned</label><label class="check"><input type="checkbox" name="has_computers" id="hasComputers" <%= room && room.has_computers ? 'checked':'' %>> Has computers</label></div>
+    <label>Computer Count</label><input type="number" name="computer_count" min="0" value="<%= room ? room.computer_count : 0 %>">
+    <label>Description</label><textarea name="description" rows="4"><%= room ? room.description || '' : '' %></textarea>
+    <label>Status</label><select name="status"><option>Available</option><option <%= room && room.status==='Unavailable'?'selected':'' %>>Unavailable</option><option <%= room && room.status==='Maintenance'?'selected':'' %>>Maintenance</option></select>
+    <div class="form-footer"><a class="button-link-dark" href="/admin/rooms">Cancel</a><button class="primary" type="submit">Save Facility</button></div>
+  </form>
+</section>

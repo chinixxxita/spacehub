@@ -1,0 +1,62 @@
+<section class="landing-page">
+  <nav class="landing-nav">
+    <a href="/" class="landing-brand" aria-label="CSPC SpaceHub home">
+      <span><strong>CSPC SpaceHub</strong><small>Room & Laboratory Reservation System</small></span>
+    </a>
+    <a class="landing-login" href="/login">Log In</a>
+  </nav>
+
+  <div class="landing-hero">
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content" data-motion="landing-hero">
+      <div class="landing-eyebrow">CSPC COLLEGE OF COMPUTER STUDIES</div>
+      <h1>Your campus.<br><em>Your space.</em></h1>
+      <p>Find a facility, check availability, and submit a reservation request through one simple campus system.</p>
+      <div class="hero-actions">
+        <a class="hero-primary" href="/login">Make a Reservation</a>
+        <a class="hero-secondary" href="/login">Check Availability</a>
+      </div>
+      <div class="hero-note">Designed for CSPC-CCS students, faculty, and instructors.</div>
+    </div>
+
+    <aside class="availability-card" data-motion="landing-panel" aria-label="SpaceHub overview">
+      <div class="availability-top">
+        <div>
+          <span class="mini-label">SPACEHUB</span>
+          <h2>Reserve with confidence.</h2>
+        </div>
+        <span class="date-chip">2026</span>
+      </div>
+
+      <div class="landing-capabilities">
+        <div class="landing-capability">
+          <strong>Rooms</strong>
+          <span>Classrooms for academic and approved student activities.</span>
+        </div>
+        <div class="landing-capability">
+          <strong>Laboratories</strong>
+          <span>Instructor-led computer facilities for classes and technical activities.</span>
+        </div>
+        <div class="landing-capability">
+          <strong>Live schedule</strong>
+          <span>Check pending, booked, and maintenance periods before requesting.</span>
+        </div>
+      </div>
+
+      <% if (rooms && rooms.length) { %>
+        <div class="landing-availability">
+          <span class="mini-label">AVAILABLE FACILITIES</span>
+          <% rooms.slice(0, 3).forEach(room => { %>
+            <div class="landing-room">
+              <span><strong><%= room.name %></strong><small><%= room.type %> · <%= room.capacity %> seats</small></span>
+              <b>Available</b>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </aside>
+
+    <div class="landing-bottom-note">Simple. Professional. Built for campus space management.</div>
+  </div>
+</section>

@@ -1,0 +1,41 @@
+<section>
+  <div class="page-heading">
+    <div><div class="eyebrow">ADMINISTRATION</div><h1>Dashboard</h1><p>Review reservation activity and manage CSPC SpaceHub.</p></div>
+    <a class="primary" href="/admin/requests">Review Requests</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card" data-motion="stat"><span>Pending Requests</span><strong data-count="<%= counts.pending || 0 %>"><%= counts.pending || 0 %></strong></div>
+    <div class="stat-card" data-motion="stat"><span>Approved</span><strong data-count="<%= counts.approved || 0 %>"><%= counts.approved || 0 %></strong></div>
+    <div class="stat-card" data-motion="stat"><span>Facilities</span><strong data-count="<%= rooms.total || 0 %>"><%= rooms.total || 0 %></strong></div>
+    <div class="stat-card" data-motion="stat"><span>Active Users</span><strong data-count="<%= users.total || 0 %>"><%= users.total || 0 %></strong></div>
+  </div>
+
+  <div class="admin-grid">
+    <div class="card">
+      <div class="card-heading"><div><h2>Pending Reservation Requests</h2><p>Oldest requests are shown first.</p></div><a href="/admin/requests">View all</a></div>
+      <% if (!pending.length) { %><div class="empty">No pending requests.</div><% } else { %>
+      <div class="table-wrap"><table><thead><tr><th>Reference</th><th>Requester</th><th>Facility</th><th>Date</th><th></th></tr></thead><tbody>
+        <% pending.forEach(r => { %><tr><td><strong><%= r.reference_no %></strong></td><td><%= r.full_name %><br><small><%= r.role %></small></td><td><%= r.room_name %></td><td><%= new Date(r.reservation_date).toISOString().slice(0,10) %><br><small><%= r.start_time %>–<%= r.end_time %></small></td><td><a href="/admin/requests/<%= r.id %>">Review</a></td></tr><% }) %>
+      </tbody></table></div><% } %>
+    </div>
+    <div class="card admin-side-card">
+      <h2>System Overview</h2>
+      <%
+        const nRooms = Number(rooms.regular_rooms) || 0, nLabs = Number(rooms.laboratories) || 0;
+        const nStu = Number(users.students) || 0, nFac = Number(users.faculty) || 0;
+        const share = (a, b) => (a + b) ? Math.round((a / (a + b)) * 100) : 0;
+      %>
+      <div class="split-block">
+        <div class="split-head"><span>Facilities</span><strong><%= nRooms + nLabs %></strong></div>
+        <div class="split-bar" role="img" aria-label="Rooms versus laboratories"><span class="seg seg-a" style="--pct:<%= share(nRooms, nLabs) %>%"></span><span class="seg seg-b"></span></div>
+        <div class="split-legend"><span><i class="legend-dot seg-a"></i>Regular Rooms <b><%= nRooms %></b></span><span><i class="legend-dot seg-b"></i>Laboratories <b><%= nLabs %></b></span></div>
+      </div>
+      <div class="split-block">
+        <div class="split-head"><span>Users</span><strong><%= nStu + nFac %></strong></div>
+        <div class="split-bar" role="img" aria-label="Students versus faculty"><span class="seg seg-a" style="--pct:<%= share(nStu, nFac) %>%"></span><span class="seg seg-b"></span></div>
+        <div class="split-legend"><span><i class="legend-dot seg-a"></i>Students <b><%= nStu %></b></span><span><i class="legend-dot seg-b"></i>Faculty <b><%= nFac %></b></span></div>
+      </div>
+    </div>
+  </div>
+</section>

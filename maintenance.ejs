@@ -1,0 +1,16 @@
+<section>
+  <div class="page-heading"><div><div class="eyebrow">FACILITY MANAGEMENT</div><h1>Facility Maintenance</h1><p>Schedule maintenance periods so users cannot request facilities while they are unavailable.</p></div><a class="button-link-dark" href="/admin/rooms">← Manage Facilities</a></div>
+  <div class="admin-grid">
+    <form class="card form-card" action="/admin/maintenance" method="post">
+      <h2>Schedule Maintenance</h2><p class="muted">Maintenance blocks the entire facility for the selected dates.</p>
+      <label>Facility *</label><select name="room_id" required><option value="">Select a facility</option><% rooms.forEach(room => { %><option value="<%= room.id %>"><%= room.name %> — <%= room.type %></option><% }) %></select>
+      <div class="two-col"><div><label>Start Date *</label><input type="date" name="start_date" min="<%= today %>" required></div><div><label>End Date *</label><input type="date" name="end_date" min="<%= today %>" required></div></div>
+      <label>Maintenance Reason *</label><input name="reason" maxlength="255" required placeholder="e.g. Network equipment upgrade">
+      <button class="primary" type="submit">Schedule Maintenance</button>
+    </form>
+    <div class="card"><div class="card-heading"><div><h2>Scheduled Maintenance</h2><p>Future maintenance periods are shown here.</p></div></div>
+      <% if (!maintenance.length) { %><div class="empty">No scheduled maintenance.</div><% } else { %>
+      <div class="maintenance-list"><% maintenance.forEach(m => { %><div class="maintenance-item"><div><strong><%= m.room_name %></strong><span><%= m.start_date.toString().slice(0,10) %> → <%= m.end_date.toString().slice(0,10) %></span><small><%= m.reason %></small></div><div class="maintenance-actions"><span class="badge scheduled"><%= m.status %></span><form class="inline-form" action="/admin/maintenance/<%= m.id %>/complete" method="post"><button class="text-button" type="submit">Complete</button></form><form class="inline-form" action="/admin/maintenance/<%= m.id %>/cancel" method="post"><button class="text-button danger-text" type="submit">Cancel</button></form></div></div><% }) %></div><% } %>
+    </div>
+  </div>
+</section>

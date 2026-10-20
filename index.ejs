@@ -1,0 +1,24 @@
+<section>
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">FACILITIES</div>
+      <h1>Rooms &amp; Laboratories</h1>
+      <p>View available facilities and their equipment.</p>
+    </div>
+  </div>
+
+  <div class="room-grid">
+    <% rooms.forEach(room => { %>
+      <article class="room-card">
+        <span class="facility-type"><%= room.type %></span>
+        <h2><%= room.name %></h2>
+        <p><%= room.description %></p>
+        <div class="room-meta">
+          <span>Capacity: <%= room.capacity %></span>
+          <span><%= room.air_conditioned ? "Air-conditioned" : "No AC" %></span>
+          <span><%= room.has_computers ? `${room.computer_count} PCs` : "No PCs" %></span>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>

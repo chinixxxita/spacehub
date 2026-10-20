@@ -1,0 +1,379 @@
+<section class="reservation-page">
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">RESERVATION FLOW · 1 OF 3</div>
+      <h1>Make a Reservation</h1>
+      <p>Choose a facility, date, time, and purpose. Pick a whole hour, or choose Custom time for an exact time.</p>
+    </div>
+  </div>
+
+  <% if(currentUser.role==='student'){ %>
+    <div class="notice"><strong>Laboratory access:</strong> Students are not permitted to enter laboratories without an instructor. Laboratory reservations must be made by an authorized faculty/instructor.</div>
+  <% } %>
+
+  <form id="reservationForm" class="card form-card" action="/reservations/review" method="post">
+    <div class="section-title"><span class="step-number">1</span><div><strong>Select Facility</strong><small>Choose where the activity will take place.</small></div></div>
+    <label for="roomSelect">Facility *</label>
+    <select name="room_id" id="roomSelect" required>
+      <option value="">Select a facility</option>
+      <% rooms.forEach(room=>{ const blocked=currentUser.role==='student'&&room.type==='Laboratory'; %>
+        <option value="<%= room.id %>" <%= String(form?.room_id || '') === String(room.id) ? 'selected' : '' %> <%= blocked?'disabled':'' %> data-type="<%= room.type %>" data-capacity="<%= room.capacity %>"><%= room.name %> — <%= room.type %> — Capacity <%= room.capacity %><%= blocked?' (Instructor Required)':'' %></option>
+      <% }) %>
+    </select>
+    <div id="facilityInfo" class="facility-info hidden"></div>
+
+    <div class="section-title"><span class="step-number">2</span><div><strong>Select Date & Time</strong><small>Choose a start and end hour, or enter a custom time.</small></div></div>
+    <label for="reservationDate">Date *</label>
+    <input type="date" name="reservation_date" id="reservationDate" min="<%= new Date().toISOString().slice(0,10) %>" value="<%= form?.reservation_date || '' %>" required>
+
+    <div id="availabilityPanel" class="availability-panel hidden">
+      <div class="availability-header">
+        <div>
+          <div class="eyebrow">SCHEDULE</div>
+          <h3>Select a reservation time</h3>
+          <p id="availabilityMessage">Reservations run from 7:00 AM to 7:00 PM. Only free times are listed; use Custom time for minutes.</p>
+        </div>
+      </div>
+
+      <div class="time-selects">
+        <div>
+          <label for="startPicker">Start time *</label>
+          <select id="startPicker"><option value="">Select start time</option></select>
+          <input type="time" id="startCustom" class="hidden" step="900" min="07:00" max="19:00" aria-label="Custom start time" style="margin-top:8px">
+        </div>
+        <div>
+          <label for="endPicker">End time *</label>
+          <select id="endPicker" disabled><option value="">Select start time first</option></select>
+          <input type="time" id="endCustom" class="hidden" step="900" min="07:00" max="19:00" aria-label="Custom end time" style="margin-top:8px">
+        </div>
+      </div>
+
+      <p id="bookedNote" class="booked-note" aria-live="polite">
+        <span id="bookedLine"></span>
+        <span id="maintLine" class="maint-line hidden"></span>
+      </p>
+
+      <div id="timeSummary" class="time-summary" aria-live="polite">Choose a start time to begin.</div>
+    </div>
+
+    <input type="hidden" name="start_time" id="startTime" value="<%= form?.start_time || '' %>">
+    <input type="hidden" name="end_time" id="endTime" value="<%= form?.end_time || '' %>">
+
+    <div class="section-title"><span class="step-number">3</span><div><strong>Reservation Details</strong><small>Tell us what the facility will be used for.</small></div></div>
+    <div class="two-col">
+      <div>
+        <label for="purpose">Purpose *</label>
+        <select name="purpose" id="purpose" required>
+          <option value="">Select purpose</option>
+          <% purposes.forEach(p=>{ %><option <%= form?.purpose === p ? 'selected' : '' %>><%= p %></option><% }) %>
+        </select>
+      </div>
+      <div>
+        <label for="numberUsers">Number of Users *</label>
+        <input type="number" name="number_of_users" id="numberUsers" min="1" max="<%= maxUsers %>" value="<%= form?.number_of_users || '' %>" required>
+        <small id="capacityHint" class="field-hint">Select a facility to see its capacity. Maximum <%= maxUsers %> users per booking.</small>
+      </div>
+    </div>
+    <div id="chairsBox" class="chairs-box hidden">
+      <div class="notice compact"><strong>Your group is larger than this facility's capacity.</strong> <span id="chairsMsg"></span></div>
+      <label for="extraChairs">Do you want additional chairs? *</label>
+      <select name="extra_chairs" id="extraChairs" disabled>
+        <option value="">Select an option</option>
+        <option value="Yes" <%= form?.extra_chairs === 'Yes' ? 'selected' : '' %>>Yes, please add chairs</option>
+        <option value="No" <%= form?.extra_chairs === 'No' ? 'selected' : '' %>>No, we will manage</option>
+      </select>
+    </div>
+    <div id="computerNote" class="notice compact hidden"><strong>Computers:</strong> Only <%= computersAvailable %> computers are available for laboratory use. If your group is larger, some users will need to share workstations.</div>
+
+    <label for="purposeDetails">Purpose Details *</label>
+    <textarea name="purpose_details" id="purposeDetails" rows="4" required placeholder="Briefly describe the class, project, meeting, or activity."><%= form?.purpose_details || '' %></textarea>
+
+    <div class="form-footer">
+      <span class="muted">Your request will be submitted as <strong>Pending</strong> for approval.</span>
+      <button class="primary" type="submit">Review Reservation</button>
+    </div>
+  </form>
+</section>
+
+<script>
+(() => {
+  const rs = document.getElementById('roomSelect');
+  const di = document.getElementById('reservationDate');
+  const panel = document.getElementById('availabilityPanel');
+  const msg = document.getElementById('availabilityMessage');
+  const sp = document.getElementById('startPicker');
+  const ep = document.getElementById('endPicker');
+  const spc = document.getElementById('startCustom');
+  const epc = document.getElementById('endCustom');
+  const CUSTOM = '__custom';
+  const getStart = () => sp.value === CUSTOM ? spc.value : sp.value;
+  const getEnd = () => ep.value === CUSTOM ? epc.value : ep.value;
+  const si = document.getElementById('startTime');
+  const ei = document.getElementById('endTime');
+  const bookedLine = document.getElementById('bookedLine');
+  const maintLine = document.getElementById('maintLine');
+  const summary = document.getElementById('timeSummary');
+  const hint = document.getElementById('capacityHint');
+  const nu = document.getElementById('numberUsers');
+  const fi = document.getElementById('facilityInfo');
+
+  let blocks = [];
+  let restored = false;
+  const initialStart = <%- JSON.stringify(form?.start_time || '') %>;
+  const initialEnd = <%- JSON.stringify(form?.end_time || '') %>;
+
+  const min = (t) => {
+    if (!t) return NaN;
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  };
+  const fmt = (t) => {
+    const [h, m] = t.split(':').map(Number);
+    return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
+  };
+  // "9:00–10:30 AM" when both ends share AM/PM, otherwise "11:00 AM–1:00 PM".
+  const fmtRange = (a, b) => {
+    const fa = fmt(a), fb = fmt(b);
+    return fa.slice(-2) === fb.slice(-2) ? `${fa.slice(0, -3)}\u2013${fb}` : `${fa}\u2013${fb}`;
+  };
+  const duration = (a, b) => {
+    const d = min(b) - min(a);
+    if (!a || !b || !(d > 0)) return null;
+    const h = Math.floor(d / 60), m = d % 60;
+    return h ? `${h} hr${h > 1 ? 's' : ''} ${m} min` : `${m} min`;
+  };
+
+  // Merge back-to-back 15-minute slots with the same status into ranges.
+  function ranges(status) {
+    const out = [];
+    blocks.forEach((x) => {
+      if (x.status !== status) return;
+      const last = out[out.length - 1];
+      if (last && last[1] === x.start) last[1] = x.end;
+      else out.push([x.start, x.end]);
+    });
+    return out;
+  }
+
+  // A range is valid only if every 15-minute slot in it is free.
+  function isRangeAvailable(a, b) {
+    if (!a || !b || min(a) >= min(b)) return false;
+    const chain = blocks.filter(x => min(x.start) >= min(a) && min(x.end) <= min(b));
+    return chain.length > 0 &&
+      chain.every(x => x.status === 'Available') &&
+      chain[0].start === a &&
+      chain[chain.length - 1].end === b &&
+      chain.every((x, i) => i === 0 || x.start === chain[i - 1].end);
+  }
+
+  function option(value, text) {
+    const o = document.createElement('option');
+    o.value = value;
+    o.textContent = text;
+    return o;
+  }
+
+  // START: whole hours that are free, plus "Custom time" for exact minutes.
+  function populateStart(keep = '') {
+    const free = blocks.filter(x => x.status === 'Available');
+    sp.innerHTML = '';
+    sp.appendChild(option('', free.length ? 'Select start time' : 'No times available'));
+    free.filter(x => x.start.endsWith(':00')).forEach(x => sp.appendChild(option(x.start, fmt(x.start))));
+    if (free.length) sp.appendChild(option(CUSTOM, 'Custom time\u2026'));
+    sp.disabled = !free.length;
+    spc.classList.add('hidden'); spc.value = '';
+    if (!keep) return;
+    if (free.some(x => x.start === keep)) {
+      if ([...sp.options].some(o => o.value === keep)) sp.value = keep;
+      else { sp.value = CUSTOM; spc.value = keep; spc.classList.remove('hidden'); }
+    }
+  }
+
+  // END: unlocked by a start; whole hours up to the next unavailable slot, plus "Custom time".
+  function populateEnd(keep = '') {
+    const a = getStart();
+    ep.innerHTML = '';
+    ep.appendChild(option('', a ? 'Select end time' : 'Select start time first'));
+    ep.disabled = !a;
+    epc.classList.add('hidden'); epc.value = '';
+    if (!a) return;
+
+    let previousEnd = a;
+    const valid = [];
+    for (const x of blocks) {
+      if (min(x.start) < min(a)) continue;
+      if (x.start !== previousEnd || x.status !== 'Available') break;
+      valid.push(x.end);
+      previousEnd = x.end;
+    }
+    valid.filter(t => t.endsWith(':00')).forEach(t => ep.appendChild(option(t, fmt(t))));
+    if (valid.length) ep.appendChild(option(CUSTOM, 'Custom time\u2026'));
+    if (!keep) return;
+    if (valid.includes(keep)) {
+      if ([...ep.options].some(o => o.value === keep)) ep.value = keep;
+      else { ep.value = CUSTOM; epc.value = keep; epc.classList.remove('hidden'); }
+    }
+  }
+
+  function renderNote() {
+    const booked = ranges('Booked');
+    bookedLine.textContent = booked.length
+      ? `Already booked on this date: ${booked.map(r => fmtRange(r[0], r[1])).join(', ')}`
+      : 'No bookings yet on this date.';
+
+    const maint = ranges('Maintenance');
+    maintLine.classList.toggle('hidden', !maint.length);
+    maintLine.textContent = maint.length
+      ? `Under maintenance: ${maint.map(r => fmtRange(r[0], r[1])).join(', ')}`
+      : '';
+  }
+
+  function sync() {
+    spc.classList.toggle('hidden', sp.value !== CUSTOM);
+    epc.classList.toggle('hidden', ep.value !== CUSTOM);
+    const a = getStart(), b = getEnd();
+    si.value = a;
+    ei.value = b;
+    const d = duration(a, b);
+    if (d) {
+      summary.textContent = `${fmt(a)} \u2013 ${fmt(b)} \u00b7 ${d}`;
+      summary.classList.add('is-set');
+    } else {
+      summary.textContent = a ? 'Now choose an end time.' : 'Choose a start time to begin.';
+      summary.classList.remove('is-set');
+    }
+  }
+
+  function reset() {
+    blocks = [];
+    populateStart();
+    populateEnd();
+    sp.disabled = true;
+    bookedLine.textContent = '';
+    maintLine.classList.add('hidden');
+    sync();
+  }
+
+  async function load() {
+    const wantRestore = !restored;
+    restored = true;
+    reset();
+    if (!rs.value || !di.value) {
+      panel.classList.add('hidden');
+      fi.classList.add('hidden');
+      return;
+    }
+
+    panel.classList.remove('hidden');
+    msg.textContent = 'Loading available times\u2026';
+
+    try {
+      const r = await fetch(`/reservations/availability?room_id=${encodeURIComponent(rs.value)}&date=${encodeURIComponent(di.value)}`);
+      const d = await r.json();
+      if (!r.ok) throw Error(d.error || 'Unable to load availability.');
+
+      blocks = d.blocks || [];
+      populateStart();
+      populateEnd();
+
+      // Put back a drafted selection (after "Back" from the review page), if it is still free.
+      if (wantRestore && initialStart && initialEnd) {
+        populateStart(initialStart);
+        if (getStart() === initialStart) {
+          populateEnd(initialEnd);
+          if (getEnd() !== initialEnd) { sp.value = ''; spc.value = ''; populateEnd(); }
+        }
+      }
+      renderNote();
+      sync();
+
+      const room = d.room;
+      fi.classList.remove('hidden');
+      fi.innerHTML = `<strong>${room.name}</strong><span>${room.type}</span><span>Capacity: ${room.capacity}</span><span>${room.air_conditioned ? 'Air-conditioned' : 'No AC'}</span><span>${room.has_computers ? room.computer_count + ' PCs' : 'No PCs'}</span>`;
+      hint.textContent = `Facility capacity: ${room.capacity} · Maximum ${<%= maxUsers %>} users per booking.`;
+      nu.max = <%= maxUsers %>;
+
+      const anyFree = blocks.some(x => x.status === 'Available');
+      msg.textContent = !anyFree
+        ? 'No times are available on this date. Please choose another date or facility.'
+        : d.maintenance
+          ? 'Maintenance affects part of this date. Those times are not listed.'
+          : 'Reservations run from 7:00 AM to 7:00 PM. Only free times are listed; use Custom time for minutes.';
+    } catch (e) {
+      msg.textContent = e.message || 'Availability could not be loaded.';
+    }
+  }
+
+  const keepEnd = () => ep.value === CUSTOM ? epc.value : ep.value;
+  function onStartChange() {
+    populateEnd(keepEnd());   // keeps the end time only if it is still valid for the new start
+    sync();
+  }
+  sp.addEventListener('change', onStartChange);
+  spc.addEventListener('change', () => {
+    // A custom start must be a free time; otherwise clear it.
+    if (spc.value && !blocks.some(x => x.status === 'Available' && x.start === spc.value)) {
+      spc.value = '';
+      msg.textContent = 'That time is not available. Please choose a free time (15-minute steps).';
+    }
+    onStartChange();
+  });
+  ep.addEventListener('change', sync);
+  epc.addEventListener('change', () => {
+    if (epc.value && ![...ep.options].length) epc.value = '';
+    const a = getStart();
+    if (epc.value && !isRangeAvailable(a, epc.value)) {
+      epc.value = '';
+      msg.textContent = 'That end time is not available. It must be after the start and before the next booking.';
+    }
+    sync();
+  });
+
+  rs.addEventListener('change', load);
+  di.addEventListener('change', load);
+
+  document.getElementById('reservationForm').addEventListener('submit', (e) => {
+    if (!si.value || !ei.value || !isRangeAvailable(si.value, ei.value)) {
+      e.preventDefault();
+      msg.textContent = 'Please select a start and end time.';
+      panel.classList.remove('hidden');
+      (si.value ? (ep.value === CUSTOM ? epc : ep) : (sp.value === CUSTOM ? spc : sp)).focus();
+      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  if (rs.value && di.value) load();
+})();
+
+  // Over-capacity chairs prompt and laboratory computer note
+  (() => {
+    const roomSel = document.getElementById('roomSelect');
+    const users = document.getElementById('numberUsers');
+    const box = document.getElementById('chairsBox');
+    const chairs = document.getElementById('extraChairs');
+    const chairsMsg = document.getElementById('chairsMsg');
+    const computerNote = document.getElementById('computerNote');
+    if (!roomSel || !users || !box || !chairs) return;
+
+    function update() {
+      const opt = roomSel.selectedOptions[0];
+      const capacity = opt && opt.dataset.capacity ? Number(opt.dataset.capacity) : 0;
+      const isLab = opt && opt.dataset.type === 'Laboratory';
+      const count = Number(users.value);
+      const over = capacity > 0 && count > capacity && count <= <%= maxUsers %>;
+
+      box.classList.toggle('hidden', !over);
+      chairs.disabled = !over;
+      chairs.required = over;
+      if (!over) chairs.value = '';
+      if (over) {
+        const extra = count - capacity;
+        chairsMsg.textContent = `It seats ${capacity}, and you entered ${count}. Please note whether you want ${extra} additional ${extra === 1 ? 'chair' : 'chairs'} added.`;
+      }
+      computerNote.classList.toggle('hidden', !isLab);
+    }
+    roomSel.addEventListener('change', update);
+    users.addEventListener('input', update);
+    update();
+  })();
+</script>

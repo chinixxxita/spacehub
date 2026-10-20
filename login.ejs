@@ -1,0 +1,24 @@
+<section class="auth-card login-card" aria-labelledby="login-title" data-motion="login-card">
+  <div class="brand-center">
+    <div class="brand-mark">SH</div>
+    <h1 id="login-title">CSPC SpaceHub</h1>
+    <p>Room & Laboratory Reservation System</p>
+  </div>
+
+  <div class="login-heading">
+    <h2>Welcome back</h2>
+    <p>Sign in to manage your campus space reservations.</p>
+  </div>
+
+  <form action="/login" method="post" class="login-form">
+    <label for="school_id">School / Institutional ID</label>
+    <input id="school_id" name="school_id" type="text" required autocomplete="username" value="<%= form?.school_id || '' %>" placeholder="Enter your ID">
+
+    <label for="password">Password</label>
+    <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
+
+    <button class="primary full login-submit" type="submit">Log In</button>
+  </form>
+
+  <p class="muted center login-register">Don't have an account? <a href="/register">Create an account</a></p>
+</section>

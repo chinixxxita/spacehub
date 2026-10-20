@@ -1,0 +1,26 @@
+<section>
+  <div class="page-heading">
+    <div><div class="eyebrow">RESERVATION</div><h1>Reservation Details</h1><p>Review the complete information and current status of your request.</p></div>
+    <a class="button-link-dark" href="/reservations/my">← Back to My Reservations</a>
+  </div>
+
+  <div class="detail-grid">
+    <div class="card">
+      <div class="detail-header"><div><span class="facility-type"><%= reservation.room_type %></span><h2><%= reservation.room_name %></h2></div><span class="badge <%= reservation.status.toLowerCase() %>"><%= reservation.status %></span></div>
+      <div class="detail-reference"><span>REFERENCE NUMBER</span><strong><%= reservation.reference_no %></strong></div>
+      <div class="detail-fields">
+        <div><span>Date</span><strong><%= String(reservation.reservation_date).slice(0,10) %></strong></div>
+        <div><span>Time</span><strong><%= reservation.start_time %> – <%= reservation.end_time %></strong></div>
+        <div><span>Purpose</span><strong><%= reservation.purpose %></strong></div>
+        <div><span>Number of Users</span><strong><%= reservation.number_of_users %></strong></div>
+        <div><span>Building</span><strong><%= reservation.building || '—' %></strong></div>
+        <div><span>Floor</span><strong><%= reservation.floor || '—' %></strong></div>
+      </div>
+      <div class="detail-section"><h3>Purpose Details</h3><p><%= reservation.purpose_details %></p></div>
+      <% if (reservation.rejection_reason) { %><div class="rejection-note"><strong>Rejection Reason</strong><p><%= reservation.rejection_reason %></p></div><% } %>
+      <% if (reservation.can_cancel) { %><form action="/reservations/<%= reservation.id %>/cancel" method="post" onsubmit="return confirm('Cancel this reservation?');"><button class="danger-outline" type="submit">Cancel Reservation</button></form><% } %>
+    </div>
+
+    <aside class="card detail-side"><h3>Facility Information</h3><div class="facility-info"><span>Capacity: <%= reservation.capacity %></span><span><%= reservation.air_conditioned ? 'Air-conditioned' : 'No AC' %></span><span><%= reservation.has_computers ? reservation.computer_count + ' PCs' : 'No PCs' %></span></div><h3>Request Status</h3><p><span class="badge <%= reservation.status.toLowerCase() %>"><%= reservation.status %></span></p><p class="muted"><%= ({ Pending: 'Awaiting review by an authorized administrator.', Approved: 'Your reservation is approved.', Rejected: 'This request was not approved.', Cancelled: 'This reservation was cancelled.', Completed: 'This reservation has been completed.' })[reservation.status] || '' %></p></aside>
+  </div>
+</section>

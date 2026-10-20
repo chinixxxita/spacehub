@@ -1,0 +1,12 @@
+<section><div class="page-heading"><div><div class="eyebrow">ACCOUNT</div><h1>Security</h1><p>Change your password and keep your account protected.</p></div></div>
+  <div class="security-grid">
+    <form class="card form-card" action="/security/password" method="post">
+      <h2>Change Password</h2>
+      <label>Current Password *</label><input type="password" name="current_password" autocomplete="current-password" required>
+      <label>New Password *</label><input type="password" name="new_password" minlength="8" autocomplete="new-password" required><small class="field-hint">Use at least 8 characters.</small>
+      <label>Confirm New Password *</label><input type="password" name="confirm_password" minlength="8" autocomplete="new-password" required>
+      <div class="form-footer"><span class="muted">Your password is stored as a salted hash.</span><button class="primary">Change Password</button></div>
+    </form>
+    <div class="card security-info"><h2>Account Security</h2><ul><li>Passwords are never stored as plain text.</li><li>Database queries use parameterized values.</li><li>Your account role is controlled by the system.</li><li>Log out when using a shared computer.</li></ul></div>
+  </div>
+</section>

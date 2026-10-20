@@ -1,0 +1,102 @@
+<%
+  const total = Number(summary.total) || 0;
+  const approved = Number(summary.approved) || 0;
+  const rejected = Number(summary.rejected) || 0;
+  const completed = Number(summary.completed) || 0;
+  const other = Math.max(total - approved - rejected - completed, 0);
+  const pct = (n) => total ? Math.round((n / total) * 100) : 0;
+  const slices = [
+    { key: 'approved',  label: 'Approved',          value: approved },
+    { key: 'completed', label: 'Completed',         value: completed },
+    { key: 'rejected',  label: 'Rejected',          value: rejected },
+    { key: 'other',     label: 'Pending / Other',   value: other }
+  ];
+  let acc = 0;
+  const stops = slices.map(s => {
+    const start = acc; acc += total ? (s.value / total) * 100 : 0;
+    return { ...s, start, end: acc };
+  });
+  const maxFacility = Math.max(1, ...byFacility.map(r => Number(r.reservations) || 0));
+  const maxPurpose  = Math.max(1, ...byPurpose.map(r => Number(r.total) || 0));
+%>
+<section>
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">ADMINISTRATION</div>
+      <h1>Reports</h1>
+      <p>Reservation summaries for monitoring facility usage.</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card"><span>Total Reservations</span><strong><%= total %></strong></div>
+    <div class="stat-card"><span>Approved</span><strong><%= approved %></strong></div>
+    <div class="stat-card"><span>Rejected</span><strong><%= rejected %></strong></div>
+    <div class="stat-card"><span>Completed</span><strong><%= completed %></strong></div>
+  </div>
+
+  <div class="report-grid">
+    <div class="card">
+      <div class="card-heading"><div><h2>Status Breakdown</h2><p>Share of all reservation requests.</p></div></div>
+      <% if (!total) { %>
+        <div class="empty"><p>No reservations recorded yet.</p></div>
+      <% } else { %>
+        <div class="donut-wrap">
+          <div class="donut" role="img" aria-label="Reservation status breakdown"
+               style="--a-end:<%= stops[0].end %>; --c-end:<%= stops[1].end %>; --r-end:<%= stops[2].end %>;">
+            <div class="donut-hole"><strong><%= total %></strong><span>Total</span></div>
+          </div>
+          <ul class="chart-legend">
+            <% stops.forEach(s => { %>
+              <li><span class="legend-dot dot-<%= s.key %>"></span><span class="legend-label"><%= s.label %></span><strong><%= s.value %></strong><small><%= pct(s.value) %>%</small></li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="card">
+      <div class="card-heading"><div><h2>Reservations by Facility</h2><p>Most requested facilities first.</p></div></div>
+      <% if (!byFacility.length) { %>
+        <div class="empty"><p>No facility data yet.</p></div>
+      <% } else { %>
+        <ol class="bar-list">
+          <% byFacility.forEach((r, i) => { %>
+            <li>
+              <div class="bar-meta">
+                <span class="bar-rank"><%= i + 1 %></span>
+                <span class="bar-name"><%= r.name %><small><%= r.type %></small></span>
+                <strong class="bar-value"><%= r.reservations %></strong>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="--pct:<%= Math.round(((Number(r.reservations) || 0) / maxFacility) * 100) %>%"></div></div>
+            </li>
+          <% }) %>
+        </ol>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-heading"><div><h2>Reservations by Purpose</h2><p>What facilities are being used for.</p></div></div>
+    <% if (!byPurpose.length) { %>
+      <div class="empty"><p>No purpose data yet.</p></div>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="data-bars">
+          <thead><tr><th>Purpose</th><th class="num">Total</th><th class="num">Share</th><th>Distribution</th></tr></thead>
+          <tbody>
+            <% const purposeTotal = byPurpose.reduce((s, r) => s + (Number(r.total) || 0), 0) || 1; %>
+            <% byPurpose.forEach(r => { %>
+              <tr>
+                <td><strong><%= r.purpose %></strong></td>
+                <td class="num"><%= r.total %></td>
+                <td class="num"><%= Math.round(((Number(r.total) || 0) / purposeTotal) * 100) %>%</td>
+                <td class="bar-cell"><div class="bar-track slim"><div class="bar-fill" style="--pct:<%= Math.round(((Number(r.total) || 0) / maxPurpose) * 100) %>%"></div></div></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</section>

@@ -1,0 +1,10 @@
+<section>
+  <div class="page-heading"><div><div class="eyebrow">ADMINISTRATION</div><h1>Reservation Requests</h1><p>Review and process facility reservation requests.</p></div></div>
+  <div class="filter-tabs">
+    <% ['Pending','Approved','Rejected','Cancelled','Completed','All'].forEach(s => { %><a class="<%= filter===s?'active':'' %>" href="/admin/requests?status=<%= s %>"><%= s %></a><% }) %>
+  </div>
+  <div class="card"><div class="table-wrap"><table data-table><thead><tr><th>Reference</th><th>Requester</th><th>Facility</th><th>Date & Time</th><th>Purpose</th><th>Status</th><th></th></tr></thead><tbody>
+    <% if (!requests.length) { %><tr><td colspan="7" class="center muted">No reservations found.</td></tr><% } %>
+    <% requests.forEach(r => { %><tr><td><strong><%= r.reference_no %></strong></td><td><%= r.full_name %><br><small><%= r.school_id %> · <%= r.role %></small></td><td><%= r.room_name %><br><small><%= r.room_type %></small></td><td><%= new Date(r.reservation_date).toISOString().slice(0,10) %><br><small><%= r.start_time %>–<%= r.end_time %></small></td><td><%= r.purpose %></td><td><span class="badge <%= r.status.toLowerCase() %>"><%= r.status %></span></td><td><a href="/admin/requests/<%= r.id %>">View</a></td></tr><% }) %>
+  </tbody></table></div></div>
+</section>

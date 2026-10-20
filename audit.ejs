@@ -1,0 +1,7 @@
+<section>
+  <div class="page-heading"><div><div class="eyebrow">SECURITY & ACCOUNTABILITY</div><h1>Audit Trail</h1><p>Track important administrative and reservation actions across CSPC SpaceHub.</p></div></div>
+  <div class="card"><div class="table-wrap"><table data-table><thead><tr><th>Date & Time</th><th>User</th><th>Action</th><th>Entity</th><th>Details</th><th>IP</th></tr></thead><tbody>
+  <% if (!logs.length) { %><tr><td colspan="6"><div class="empty">No audit activity has been recorded yet.</div></td></tr><% } %>
+  <% logs.forEach(log => { %><tr><td data-sort="<%= new Date(log.created_at).getTime() %>"><strong><%= new Date(log.created_at).toLocaleString() %></strong></td><td><%= log.full_name || 'System / Deleted User' %><br><small><%= log.school_id || '' %> <%= log.role ? '· ' + log.role : '' %></small></td><td><span class="audit-action"><%= log.action.replaceAll('_',' ') %></span></td><td><%= log.entity_type %><%= log.entity_id ? ' #' + log.entity_id : '' %></td><td><%= log.details || '—' %></td><td><%= log.ip_address || '—' %></td></tr><% }) %>
+  </tbody></table></div></div>
+</section>

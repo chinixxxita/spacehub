@@ -1,0 +1,8 @@
+<section><div class="page-heading"><div><div class="eyebrow">ACCOUNT</div><h1>Settings</h1><p>Manage your SpaceHub notification preferences.</p></div></div>
+  <form class="card form-card settings-card" action="/settings" method="post">
+    <h2>Notifications</h2>
+    <label class="setting-row"><span><strong>Reservation updates</strong><small>Show notifications when your reservation is approved, rejected, or cancelled.</small></span><input type="checkbox" name="reservation_updates" <%= settings.reservation_updates ? "checked" : "" %>></label>
+    <label class="setting-row"><span><strong>Email notifications</strong><small>Keep this preference ready for email notification delivery when email service is configured.</small></span><input type="checkbox" name="email_notifications" <%= settings.email_notifications ? "checked" : "" %>></label>
+    <div class="form-footer"><span class="muted">Changes are saved to your account.</span><button class="primary">Save Settings</button></div>
+  </form>
+</section>

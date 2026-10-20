@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | CSPC SpaceHub</title>
+  <meta name="theme-color" content="#102a56">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232563c9'/%3E%3Cstop offset='1' stop-color='%23102a56'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-size='28' font-weight='800' text-anchor='middle' fill='%23fff'%3ESH%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/css/app.css?v=20261012">
+</head>
+<%
+  const activePath = currentPath || '';
+  const is = (p) => activePath === p;
+  const under = (p) => activePath.startsWith(p);
+  const isAuthPage = activePath === '/login' || activePath === '/register';
+  const navItem = (href, label, active, badge) =>
+    `<a class="${active ? 'active' : ''}" href="${href}"${active ? ' aria-current="page"' : ''}>${label}${badge > 0 ? `<span class="nav-badge">${badge}</span>` : ''}</a>`;
+  const myReservationsActive = under('/reservations/') && !under('/reservations/new');
+%>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <% if (currentUser) { %>
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">SH</span>
+        <span><strong>CSPC SpaceHub</strong><small>Room &amp; Laboratory Reservation</small></span>
+      </div>
+      <nav aria-label="Main navigation">
+        <div class="nav-section">MAIN</div>
+        <%- navItem('/dashboard', 'Dashboard', is('/dashboard')) %>
+        <% if (currentUser.role !== 'admin') { %>
+          <%- navItem('/reservations/new', 'Make Reservation', under('/reservations/new')) %>
+          <%- navItem('/reservations/my', 'My Reservations', myReservationsActive) %>
+        <% } %>
+        <%- navItem('/rooms', 'Rooms &amp; Laboratories', under('/rooms')) %>
+        <%- navItem('/calendar', 'Calendar', under('/calendar')) %>
+
+        <% if (currentUser.role === 'admin') { %>
+          <div class="nav-section">ADMINISTRATION</div>
+          <%- navItem('/admin/requests', 'Reservation Requests', under('/admin/requests')) %>
+          <%- navItem('/admin/rooms', 'Manage Facilities', under('/admin/rooms')) %>
+          <%- navItem('/admin/maintenance', 'Maintenance', under('/admin/maintenance')) %>
+          <%- navItem('/admin/users', 'Manage Users', under('/admin/users')) %>
+          <%- navItem('/admin/reports', 'Reports', under('/admin/reports')) %>
+          <%- navItem('/admin/audit', 'Audit Trail', under('/admin/audit')) %>
+        <% } %>
+
+        <div class="nav-section">ACCOUNT</div>
+        <%- navItem('/notifications', 'Notifications', under('/notifications'), unreadNotifications) %>
+        <%- navItem('/profile', 'Profile', is('/profile')) %>
+        <%- navItem('/settings', 'Settings', is('/settings') || is('/security')) %>
+      </nav>
+      <form action="/logout" method="post" class="logout-form">
+        <button class="nav-button" type="submit">Log out</button>
+      </form>
+    </aside>
+  <% } %>
+
+  <main id="main" class="<%= currentUser ? 'app-main' : 'public-main' + (typeof isLanding !== 'undefined' && isLanding ? ' landing-main' : '') + (isAuthPage ? ' auth-page' : '') %>">
+    <% if (currentUser) { %>
+      <header class="topbar">
+        <span><%= title %></span>
+        <div class="topbar-user">
+          <a class="notification-link" href="/notifications" aria-label="Notifications">Notifications <% if (unreadNotifications > 0) { %><span class="topbar-badge"><%= unreadNotifications %></span><% } %></a>
+          <span class="who"><strong><%= currentUser.full_name %></strong><small><%= currentUser.role %></small></span>
+          <span class="avatar-sm" aria-hidden="true"><%= currentUser.full_name.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase() %></span>
+        </div>
+      </header>
+    <% } %>
+
+    <% if (success && success.length) { %>
+      <div class="flash success" role="status"><%= success[0] %></div>
+    <% } %>
+    <% if (error && error.length) { %>
+      <div class="flash error" role="alert"><%= error[0] %></div>
+    <% } %>
+
+    <%- body %>
+  </main>
+  <script src="/js/motion.js?v=20261012" defer></script>
+  <script src="/js/tables.js?v=20261012" defer></script>
+</body>
+</html>
